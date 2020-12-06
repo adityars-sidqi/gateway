@@ -1,11 +1,16 @@
-FROM java:8
-EXPOSE 8080
+FROM maven:3.5.2-jdk-8-alpine AS MAVEN_BUILD
 
-VOLUME /tmp
+COPY pom.xml /build/
+COPY src /build/src/
 
-COPY /target/gateway.jar app.jar
+WORKDIR /build/
+RUN mvn package
+RUN ls /build/
+RUN ls /build/target/
+FROM openjdk:8-jre-alpine
 
-ENV JAVA_OPTS="-Xmx128m -Xms64m"
-ENV SPRING_PROFILES_ACTIVE="kubernetes"
+WORKDIR /app
 
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
+COPY --from=MAVEN_BUILD /build/target/*.jar /app/app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

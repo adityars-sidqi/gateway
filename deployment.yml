@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  labels:
+    app: gateway
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8662
+  selector:
+    app: gateway
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: gateway
+  labels:
+    app: gateway
+spec:
+  selector:
+    matchLabels:
+      app: gateway
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+      - image: swadharma/gateway:latest
+        name: gateway
+        env:
+        - name: PORT
+          value: "8080"
+        - name: PROFILES
+          value: kubernetes
+        ports:
+        - containerPort: 8080
+          name: gateway
