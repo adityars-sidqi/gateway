@@ -1,4 +1,11 @@
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+    labels:
+      app: gateway
+    name: gateway
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: gateway
@@ -12,6 +19,20 @@ spec:
       targetPort: 8080
   selector:
     app: gateway
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    labels:
+      app: gateway
+    name: gateway:view
+roleRef:
+    kind: ClusterRole
+    apiGroup: rbac.authorization.k8s.io
+    name: view
+subjects:
+    - kind: ServiceAccount
+      name: gateway
 ---
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
@@ -31,7 +52,7 @@ spec:
         app: gateway
     spec:
       containers:
-      - image: swadharma/gateway:buildnumber
+      - image: swadharma/gateway:latest
         name: gateway
         env:
         - name: PORT
