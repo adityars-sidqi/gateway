@@ -31,7 +31,7 @@ spec:
         app: gateway
     spec:
       containers:
-      - image: swadharma/gateway:latest
+      - image: swadharma/gateway:buildnumber
         name: gateway
         env:
         - name: PORT
